@@ -1,0 +1,214 @@
+---
+title: "Tarea 3"
+author: "Farrera Fonseca Fabiola 124251    y    María Isabel  "
+date: "29 de agosto de 2014"
+output: html_document
+---
+
+#Ejercicio 1
+```{r}
+#Se creo una funcion, de la normal y con la funcion frac podemos escribir en forma de fraacion, despues ponemos las caracteristicas que queremos que cumpla nuestra grafica. 
+
+normal <- function(x){
+    (1/(sqrt(2.0*pi)))*exp(-(1/2)*x^2)
+}
+
+plot(normal,  from = -4, to = 4, 
+     xlab = "x", ylab = "f(x)", 
+      n = 100, 
+      col = "red", 
+      main = expression(paste("Grafica de la funcion ", e^-frac(x^2,sigma^2)%.%frac(1,sqrt(2*pi)))))
+abline(v = 0, col = "black")
+points(0,normal(0),col="blue",pch=19)
+
+text(0,.39,"valor maximo",pos=4)
+
+
+```
+
+#Ejercicio 2 
+
+```{r}
+# Se dio la instruccion de leer el archivo, quitando el simbolo con el que estan separados los datos , en este caso es "|"
+TC.Banxico <- read.table("tipoCambioBanxico.txt", sep = "|", header = TRUE, stringsAsFactors = FALSE)
+
+```
+
+#Ejericico 3
+```{r}
+#Se cambio el formato de fecha para que nos quede en el siguiente formato dd-mm-aaa
+TC.Banxico$Fecha.DOF <- as.Date(TC.Banxico$Fecha.DOF,format="%d/%m/%Y")
+str(TC.Banxico$Fecha.DOF)
+```
+
+#Ejercicio 4
+```{r}
+#Se cambia el formato de fecha para que nos quede en numero de dias que han pasado y se crea un vector con el minimo y maximo numero de dias que han pasado desde la fecha de origen que nosotros asignamos.
+x <- unclass(TC.Banxico$Fecha.DOF)
+vector<- c(min(x),max(x))
+as.Date(vector,origin="1970-01-01")
+```
+
+#Ejercicio 5
+
+```{r}
+#Se tomo el subconjunto del archivo que no tuviera datos con "N/E" para poder hacer el histograma y se pusieron varias caracteristicas para mejorar la visualizacion de la grafica 
+TC.existentes<- subset(TC.Banxico,!TC=='N/E')
+hist(as.numeric(TC.existentes$TC),breaks=56,col="green",main = "Histograma", xlab = "Tipo de Cambio", ylab = "Frecuencia")
+dev.off()
+```
+
+#Ejercicio 6
+```{r}
+#En la grafica anterior podemos ver claramente que los valores del tipo de cambio están entre 11 y 13
+
+```
+
+#Ejercicio 7
+
+```{r}
+#Se escribe la instrucción para poder crear una imagen con formato png del histograma, con las características que se quisieron
+png("HistogramaTC.png",width = 450, height = 500, units = "px",bg ="transparent")
+hist(as.numeric(TC.existentes$TC),breaks=56,col="green",main = "Histograma", xlab = "Tipo de Cambio", ylab = "Frecuencia")
+dev.off()
+```
+
+
+#Ejercicio 8
+
+```{r}
+#Se utilizó un cubconjunto del archivo en el que se mostraran solamente los días hábiles y poder hacer una tabla en la que nos mostrara que día es en el que hay más actividad
+no.habiles <- subset(TC.Banxico,!weekdays(Fecha.DOF)%in%c("Saturday","Sunday")& TC=="N/E")
+dias.habiles <- weekdays(no.habiles$Fecha.DOF)
+tab <- table(dias.habiles)
+tablaC <- tab[c(2,4,5,3,1)]
+tablaC
+
+```
+
+#Ejercicio 9 
+```{r}
+#Se graficó la tabla anterior 
+barplot(tablaC,col=rainbow(5))
+
+```
+
+#Ejercicio 10
+
+```{r}
+#Se cambió el formato de la fecha para poder tenerlos en la fecha correspondiente de tal manera que se tuvo que sumar 1990
+TC.Banxico$Periodo <- as.POSIXlt(TC.Banxico$Fecha.DOF)$year+1990
+```
+
+
+#Ejercicio 11
+
+```{r }
+#Se crean los espacios para 3 columnas y 3 renglones para poder acomodar las 9 gráficas correspondiente a cada año, se toman  los valores que están definidos y los convertimos a clase numerica para poder graficarlos y con estos datos se van creando las gráficas de cada año y se agregaron las características que se desearon.
+par(mfrow = c(3, 3))
+for(year in 2006:2014) {
+ TC.Banxico.exitentes <- subset(TC.Banxico, TC !="N/E" & Periodo == year)
+ TC.Banxico.exitentes$TC <- as.numeric(TC.Banxico.exitentes$TC)
+ with(TC.Banxico.exitentes, 
+      hist(TC, breaks = seq(9.9, 15.4, length.out = 30), col = "blue", border = "white", 
+           main = as.character(year), 
+           xlab = "Tipo de cambio del dólar de E.U.A", 
+           ylab = "Frecuencia", 
+           xlim = c(9.9, 15.4),ylim = c(0, 120)))
+}
+```
+
+
+
+#Ejericicio 12
+
+#Ejercicio 13
+
+```{r}
+#Se lee el archivo "Conapo.txt" y se le quita el simbolo que separa a cada dato considerando que están los nombres de las variables para que no se lean estos renglones y se verifica que tipo de clase es.
+CONAPO <- read.table("CONAPO.txt", 
+                    sep = "@", 
+                    header = TRUE, 
+                    stringsAsFactors = FALSE)
+str(CONAPO)
+```
+
+
+
+#Ejercicio 14
+
+```{r Respuesta14, fig.height= 7, fig.width=7, eval = TRUE}
+#Se crea la variable entidades para poder hacer la grafica de cada estado y para casa uno de ellos ponemos 17 observaciones y las separamoscada una entre hombres y mujeres par apoder ver la relación que existe entre cada uno
+entidades <- c('Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 
+              'Chihuahua', 'Coahuila', 'Colima', 'Distrito Federal', 'Durango', 'Guanajuato', 
+              'Guerrero', 'Hidalgo', 'Jalisco', 'México', 'Michoacán', 'Morelos', 'Nayarit', 
+              'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 
+              'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 
+              'Zacatecas')
+
+par(mfrow = c(4, 8), mar = c(0, 0, 1, 0), oma = c(0, 0, 1.2, 0))
+
+year <- "2013"
+CONAPO.year  <- subset(CONAPO, periodo == year)
+for(i in 1:32) {
+ CONAPO.entidad  <- subset(CONAPO.year, entidad == entidades[i])
+
+ with(CONAPO.entidad, 
+      plot(0, 0, type = "n", 
+      xlim = c(-8.7, 8.7), 
+      ylim = c(0, 17), 
+      xlab ="", ylab = "", axes = FALSE, bty="n", 
+      cex.main = 0.8, main = entidades[i])
+      )
+
+ rect(0, 0:16, -CONAPO.entidad[1:17, ]$prop, 1:17, 
+      col="blue", border="white")
+ rect(0, 0:16, CONAPO.entidad[18:34, ]$prop, 1:17, 
+      col="red", border="white")
+ }
+
+mtext(paste0(year, " (Hombres, Mujeres)"), side = 3, outer = TRUE)
+```
+
+
+#Ejercicio 15
+```{r Respuesta15, fig.height= 7, fig.width=7, eval = TRUE}
+#Se guarda la gráfica en una imagen con formato png, como en la otra imagen que se guardó
+year <- "2013"
+png(file = paste0("Piramide", year, ".png"), 
+     bg = "white",
+     units = "px", 
+     height = 700, width = 900)
+
+entidades <- c('Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 
+              'Chihuahua', 'Coahuila', 'Colima', 'Distrito Federal', 'Durango', 'Guanajuato', 
+              'Guerrero', 'Hidalgo', 'Jalisco', 'México', 'Michoacán', 'Morelos', 'Nayarit', 
+              'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 
+              'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 
+              'Zacatecas')
+
+par(mfrow = c(4, 8), mar = c(0, 0, 1, 0), oma = c(0, 0, 1.2, 0))
+
+CONAPO.year  <- subset(CONAPO, periodo == year)
+for(i in 1:32) {
+ CONAPO.entidad  <- subset(CONAPO.year, entidad == entidades[i])
+
+ with(CONAPO.entidad, 
+      plot(0, 0, type = "n", 
+      xlim = c(-8.7, 8.7), 
+      ylim = c(0, 17), 
+      xlab ="", ylab = "", axes = FALSE, bty="n", 
+      cex.main = 0.8, main = entidades[i])
+      )
+
+ rect(0, 0:16, -CONAPO.entidad[1:17, ]$prop, 1:17, 
+      col="blue", border="white")
+ rect(0, 0:16, CONAPO.entidad[18:34, ]$prop, 1:17, 
+      col="red", border="white")
+ }
+# Incluimos el a??o en el m??rgen superior externo.
+mtext(paste0(year, " (Hombres, Mujeres)"), side = 3, outer = TRUE)
+
+dev.off()
+
+
